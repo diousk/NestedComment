@@ -12,13 +12,13 @@ object DataProvider {
         "Hi content"
     )
 
-    fun getComment(page: Int): List<CommentData> {
+    suspend fun getComment(page: Int): List<CommentData> {
         val adapter: JsonAdapter<List<CommentData>> =
             moshi.adapter(Types.newParameterizedType(List::class.java, CommentData::class.java))
 
-        return if (page == 0) {
+        return if (page == 1) {
             adapter.fromJson(commentsJson1)!!
-        } else if (page == 1){
+        } else if (page == 2){
             adapter.fromJson(commentsJson2)!!
         } else emptyList()
     }
@@ -65,7 +65,13 @@ object DataProvider {
             "      \"commentId\":\"id4\",\n" +
             "      \"userName\":\"user4\",\n" +
             "      \"content\":\"hello 4\",\n" +
-            "      \"replyCount\":0\n" +
+            "      \"replyCount\":1,\n" +
+            "      \"replyComment\":{\n" +
+            "         \"commentId\":\"id4_0\",\n" +
+            "         \"userName\":\"user4_0\",\n" +
+            "         \"content\":\"hello 4_0\",\n" +
+            "         \"replyCount\":0\n" +
+            "      }\n" +
             "   },\n" +
             "   {\n" +
             "      \"commentId\":\"id5\",\n" +

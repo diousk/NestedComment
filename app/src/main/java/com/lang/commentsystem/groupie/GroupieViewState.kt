@@ -5,5 +5,5 @@ import com.lang.commentsystem.data.ContentData
 
 data class GroupieViewState(
     val contentData: ContentData? = null,
-    val comments: List<CommentData>? = null
+    val comments: List<CommentData> = emptyList()
 )

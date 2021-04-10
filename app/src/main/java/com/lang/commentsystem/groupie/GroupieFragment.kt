@@ -18,7 +18,6 @@ import com.xwray.groupie.GroupieAdapter
 import com.xwray.groupie.OnItemClickListener
 import com.xwray.groupie.Section
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -45,13 +44,7 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
         binding.rvContent.addOnScrollListener(object : InfiniteScrollListener(layoutManager) {
             override fun onLoadMore(currentPage: Int) {
                 Timber.d("currentPage $currentPage")
-                viewLifecycleOwner.lifecycleScope.launch {
-                    delay(2000)
-                }
-//                val color = rainbow200[currentPage % rainbow200.size]
-//                for (i in 0..4) {
-//                    infiniteLoadingSection.add(CardItem(color))
-//                }
+                viewModel.getComment(currentPage)
             }
         })
         viewModel.selectObserve(GroupieViewState::comments)

@@ -8,5 +8,6 @@ data class CommentData(
     val userName: String,
     val content: String,
     val replyCount: Int,
-    val replyComment: CommentData?
+    val replyComment: CommentData?,
+    val expanded: Boolean? = false
 )
