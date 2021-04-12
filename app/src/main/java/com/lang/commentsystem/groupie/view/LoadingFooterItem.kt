@@ -1,4 +1,4 @@
-package com.lang.commentsystem.groupie
+package com.lang.commentsystem.groupie.view
 
 import android.view.View
 import com.lang.commentsystem.R

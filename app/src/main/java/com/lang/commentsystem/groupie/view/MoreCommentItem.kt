@@ -1,11 +1,8 @@
-package com.lang.commentsystem.groupie
+package com.lang.commentsystem.groupie.view
 
 import android.view.View
-import com.airbnb.epoxy.IdUtils
 import com.lang.commentsystem.R
-import com.lang.commentsystem.data.CommentData
 import com.lang.commentsystem.databinding.LayoutNestedMoreBinding
-import com.lang.commentsystem.databinding.LayoutRootCommentBinding
 import com.xwray.groupie.viewbinding.BindableItem
 
 class MoreCommentItem(

@@ -11,6 +11,10 @@ import com.lang.commentsystem.R
 import com.lang.commentsystem.data.CommentData
 import com.lang.commentsystem.data.DataProvider
 import com.lang.commentsystem.databinding.FragmentContentBinding
+import com.lang.commentsystem.groupie.view.CommentItem
+import com.lang.commentsystem.groupie.view.LoadingFooterItem
+import com.lang.commentsystem.groupie.view.MoreCommentItem
+import com.lang.commentsystem.groupie.view.NestedCommentItem
 import com.lang.commentsystem.utils.collectIn
 import com.lang.commentsystem.utils.viewBinding
 import com.xwray.groupie.Group
@@ -81,9 +85,9 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
             Timber.d("load more on $commentId")
 
             viewLifecycleOwner.lifecycleScope.launch {
-                val comments = DataProvider.getNestedComment2_1(commentId)
+                val comments = DataProvider.getNestedComment(commentId)
                 section.remove(moreItem)
-                Timber.d("getNestedComment2_1 done")
+                Timber.d("getNestedComment $commentId done")
                 val newCommentItems = comments.map { NestedCommentItem(it) }
                 section.addAll(newCommentItems)
                 addMoreCommentItem(section, comments.last().commentId)
