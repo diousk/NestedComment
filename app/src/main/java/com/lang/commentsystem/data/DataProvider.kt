@@ -65,13 +65,16 @@ object DataProvider {
             }
     }
 
-    suspend fun getNestedComment(commentId: String): List<CommentData> {
+    suspend fun getNestedComment(commentId: String, page: Int): List<CommentData> {
         delay(1000)
+        if (page == 3) {
+            return emptyList()
+        }
         return (1..5).map { index ->
             CommentData(
-                "${commentId}_id$index",
-                "user${commentId}_$index",
-                "hello ${commentId}_$index",
+                "${commentId}_p_${page}_id$index",
+                "user${commentId}_p_${page}_$index",
+                "hello ${commentId}_p_${page}_$index",
                 0,
                 null
             )

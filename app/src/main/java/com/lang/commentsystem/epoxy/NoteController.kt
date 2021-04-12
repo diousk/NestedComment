@@ -34,7 +34,7 @@ class NoteController @Inject constructor(
     }
 
     override fun addModels(models: List<EpoxyModel<*>>) {
-        Timber.d("addModels")
+        Timber.d("addModels models size ${models.size}")
         val modelList = models.toMutableList()
         val iterator = modelList.listIterator()
         for (model in iterator) {
@@ -45,10 +45,14 @@ class NoteController @Inject constructor(
                 val cachedComment = commentCache.getCachedComment(commentId)
                 Timber.d("cachedComment $cachedComment")
                 cachedComment?.nestedComments?.forEach {
-                    iterator.add(NestedCommentHolder(it).id(it.commentId))
+                    iterator.add(NestedCommentHolder(it)
+                        .id(it.commentId))
                 }
                 if (cachedComment?.hasMore == true) {
-                    iterator.add(ExpandNestedCommentHolder(cachedComment.commentData, cachedComment.nextPage, onLoadNestedComment))
+                    iterator.add(
+                        ExpandNestedCommentHolder(cachedComment.commentData, cachedComment.nextPage, onLoadNestedComment)
+                            .id(cachedComment.commentData.commentId)
+                    )
                 }
             }
         }

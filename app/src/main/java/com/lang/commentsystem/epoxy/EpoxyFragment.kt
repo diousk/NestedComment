@@ -10,6 +10,7 @@ import com.lang.commentsystem.databinding.FragmentContentBinding
 import com.lang.commentsystem.utils.collectIn
 import com.lang.commentsystem.utils.viewBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.receiveAsFlow
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -29,6 +30,10 @@ class EpoxyFragment : Fragment(R.layout.fragment_content), LoadNestedCommentList
         viewModel.comments.collectIn(viewLifecycleOwner) {
             Timber.d("collectIn")
             controller.submitData(it)
+        }
+
+        viewModel.commentChange.receiveAsFlow().collectIn(viewLifecycleOwner) {
+            controller.requestModelBuild()
         }
     }
 

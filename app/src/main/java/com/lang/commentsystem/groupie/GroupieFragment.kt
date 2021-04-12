@@ -85,7 +85,7 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
             Timber.d("load more on $commentId")
 
             viewLifecycleOwner.lifecycleScope.launch {
-                val comments = DataProvider.getNestedComment(commentId)
+                val comments = DataProvider.getNestedComment(commentId, 0)
                 section.remove(moreItem)
                 Timber.d("getNestedComment $commentId done")
                 val newCommentItems = comments.map { NestedCommentItem(it) }

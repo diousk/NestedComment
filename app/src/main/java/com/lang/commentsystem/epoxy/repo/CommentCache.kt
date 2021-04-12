@@ -5,7 +5,9 @@ import com.lang.commentsystem.epoxy.model.CommentCacheData
 import timber.log.Timber
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 class CommentCache @Inject constructor(
     // TODO: add single thread dispatcher
 )  {
