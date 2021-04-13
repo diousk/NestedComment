@@ -39,7 +39,7 @@ abstract class InfiniteScrollListener(private val linearLayoutManager: LinearLay
 
     fun updated() {
         Timber.d("updated totalItemCount $totalItemCount, previousTotal $previousTotal")
-        previousTotal = totalItemCount
+        previousTotal = linearLayoutManager.itemCount
     }
 
     abstract fun onLoadMore(current_page: Int)

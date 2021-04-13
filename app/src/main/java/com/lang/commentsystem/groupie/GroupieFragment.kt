@@ -65,7 +65,6 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
 
     private fun renderList(list: List<CommentCacheData>?) {
         Timber.d("state list size: ${list?.size}")
-        scrollListener.updated()
         val groups = list?.map { comment ->
             // set root comment as header
             Section(CommentItem(comment.commentData)).apply {
@@ -101,6 +100,7 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
                 if (data.hasMore) {
                     addMoreCommentItem(section, data)
                 }
+                scrollListener.updated()
             }
         })
     }
