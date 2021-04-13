@@ -22,11 +22,28 @@
         app:layout_constraintBottom_toTopOf="@+id/bottomView"
         app:layout_constraintTop_toBottomOf="@+id/title" />
 
-    <FrameLayout
+    <LinearLayout
         android:id="@+id/bottomView"
         android:layout_width="match_parent"
         android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
         android:background="@color/teal_700"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <Button
+            android:id="@+id/mainComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Main comment" />
+
+        <Button
+            android:id="@+id/nestedComment"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Nest comment" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

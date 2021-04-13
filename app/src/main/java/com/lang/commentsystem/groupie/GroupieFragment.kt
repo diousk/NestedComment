@@ -8,9 +8,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.lang.commentsystem.R
-import com.lang.commentsystem.data.CommentData
-import com.lang.commentsystem.data.DataProvider
 import com.lang.commentsystem.databinding.FragmentContentBinding
+import com.lang.commentsystem.epoxy.model.CommentCacheData
 import com.lang.commentsystem.groupie.view.CommentItem
 import com.lang.commentsystem.groupie.view.LoadingFooterItem
 import com.lang.commentsystem.groupie.view.MoreCommentItem
@@ -32,9 +31,21 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
     private val adapter by lazy { GroupieAdapter() }
 
     private val footer by lazy { LoadingFooterItem() }
-    private val sectionWithFooter by lazy { Section().apply {
-        setFooter(footer)
-    } }
+    private val sectionWithFooter by lazy {
+        Section().apply {
+            setFooter(footer)
+        }
+    }
+
+    private val scrollListener by lazy {
+        val layoutManager = binding.rvContent.layoutManager as LinearLayoutManager
+        object : InfiniteScrollListener(layoutManager) {
+            override fun onLoadMore(currentPage: Int) {
+                Timber.d("currentPage $currentPage")
+                viewModel.getComment(currentPage)
+            }
+        }
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,55 +53,54 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
         binding.rvContent.adapter = adapter.apply {
             setOnItemClickListener(onItemClickListener)
         }
+        binding.rvContent.itemAnimator?.changeDuration = 0
         adapter.add(sectionWithFooter)
 
-        val layoutManager = binding.rvContent.layoutManager as LinearLayoutManager
-        binding.rvContent.addOnScrollListener(object : InfiniteScrollListener(layoutManager) {
-            override fun onLoadMore(currentPage: Int) {
-                Timber.d("currentPage $currentPage")
-                viewModel.getComment(currentPage)
-            }
-        })
+        binding.rvContent.addOnScrollListener(scrollListener)
+
+
         viewModel.selectObserve(GroupieViewState::comments)
             .collectIn(viewLifecycleOwner, action = ::renderList)
     }
 
-    private fun renderList(list: List<CommentData>?) {
-        Timber.d("state: $list")
+    private fun renderList(list: List<CommentCacheData>?) {
+        Timber.d("state list size: ${list?.size}")
+        scrollListener.updated()
         val groups = list?.map { comment ->
             // set root comment as header
-            Section(CommentItem(comment)).apply {
-
-                // add nested first reply comment
-                comment.replyComment?.let { reply ->
-                    add(NestedCommentItem(reply))
+            Section(CommentItem(comment.commentData)).apply {
+                comment.nestedComments.forEach {
+                    add(NestedCommentItem(it))
                 }
 
                 // add more action item
-                if (comment.replyCount > 1) {
+                if (comment.hasMore) {
                     val lastItem = groups.last { it is NestedCommentItem } as NestedCommentItem
-                    addMoreCommentItem(this, lastItem.commentData.commentId)
+                    addMoreCommentItem(this, comment)
                 }
             }
         } ?: emptyList<Group>()
         sectionWithFooter.replaceAll(groups)
     }
 
-    private fun addMoreCommentItem(section: Section, commentId: String) {
+    private fun addMoreCommentItem(section: Section, comment: CommentCacheData) {
         section.add(MoreCommentItem { moreItem ->
             // when click on more item, load nested comment remove self
             moreItem.setLoading()
             moreItem.notifyChanged()
 
-            Timber.d("load more on $commentId")
-
+            Timber.d("load more on $comment")
             viewLifecycleOwner.lifecycleScope.launch {
-                val comments = DataProvider.getNestedComment(commentId, 0)
-                section.remove(moreItem)
-                Timber.d("getNestedComment $commentId done")
-                val newCommentItems = comments.map { NestedCommentItem(it) }
-                section.addAll(newCommentItems)
-                addMoreCommentItem(section, comments.last().commentId)
+                val data =
+                    viewModel.loadNestedComment(comment.commentData.commentId, comment.nextPage)
+                        ?: return@launch
+                val newNestedComment =
+                    data.nestedComments.map { NestedCommentItem(it) } ?: emptyList()
+                section.update(newNestedComment)
+
+                if (data.hasMore) {
+                    addMoreCommentItem(section, data)
+                }
             }
         })
     }
