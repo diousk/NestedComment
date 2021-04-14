@@ -13,6 +13,16 @@ object DataProvider {
         "Hi content"
     )
 
+    fun createUserComment(commentId: String): CommentData {
+        return CommentData(
+            "${commentId}_user_new_0",
+            "user_user_new_0",
+            "hello user_new_0",
+            0,
+            null
+        )
+    }
+
     suspend fun getComment(page: Int): List<CommentData> {
         delay(1000)
         val adapter: JsonAdapter<List<CommentData>> =

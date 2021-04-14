@@ -49,9 +49,10 @@ class NoteController @Inject constructor(
                         .id(it.commentId))
                 }
                 if (cachedComment?.hasMore == true) {
+                    Timber.d("cachedComment.nextPage ${cachedComment.nextPage} ")
                     iterator.add(
                         ExpandNestedCommentHolder(cachedComment.commentData, cachedComment.nextPage, onLoadNestedComment)
-                            .id(cachedComment.commentData.commentId)
+                            .id(cachedComment.commentData.commentId + cachedComment.nextPage)
                     )
                 }
             }

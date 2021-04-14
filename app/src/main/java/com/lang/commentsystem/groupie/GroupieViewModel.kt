@@ -6,7 +6,9 @@ import com.lang.commentsystem.epoxy.model.CommentCacheData
 import com.lang.commentsystem.epoxy.repo.CommentCache
 import com.lang.commentsystem.utils.ReduxViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -15,6 +17,9 @@ import javax.inject.Inject
 class GroupieViewModel @Inject constructor(
     val commentCache: CommentCache
 ) : ReduxViewModel<GroupieViewState>(GroupieViewState()) {
+
+    private val _events = Channel<String>(Channel.RENDEZVOUS)
+    val events = _events.receiveAsFlow()
 
     fun getComment(page: Int) = viewModelScope.launch(defaultErrorHandler) {
         Timber.d("getComment page $page")
@@ -44,5 +49,30 @@ class GroupieViewModel @Inject constructor(
         val target = state.value.comments.indexOfFirst { it.commentData.commentId == commentId }
         state.value.comments[target] = commentCache.getCachedComment(commentId)!!
         return commentCache.getCachedComment(commentId)
+    }
+
+    fun mainComment(noteId: String) = viewModelScope.launch(defaultErrorHandler) {
+        delay(1000)
+        val commentData = DataProvider.createUserComment(noteId)
+        val commentCacheData = CommentCacheData(commentData, emptyList())
+        commentCache.updateComment(commentCacheData)
+        val newList = listOf(commentCacheData) + state.value.comments
+        Timber.d("newList size ${newList.size}")
+        setState {
+            copy(
+                comments = newList.toMutableList()
+            )
+        }
+        _events.send("") // scroll to top
+    }
+
+    suspend fun nestedComment(commentId: String): CommentCacheData {
+        val commentData = DataProvider.createUserComment(commentId)
+        val commentCacheData = commentCache.getCachedComment(commentId)!!
+        commentCache.appendNestedComment(commentId, listOf(commentData), commentCacheData.nextPage)
+        val target = state.value.comments.indexOfFirst { it.commentData.commentId == commentId }
+        state.value.comments[target] = commentCache.getCachedComment(commentId)!!
+        _events.send(commentId) // scroll to comment
+        return commentCache.getCachedComment(commentId)!!
     }
 }

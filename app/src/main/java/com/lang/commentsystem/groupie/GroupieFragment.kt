@@ -57,10 +57,26 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
         adapter.add(sectionWithFooter)
 
         binding.rvContent.addOnScrollListener(scrollListener)
+        binding.mainComment.setOnClickListener {
+            viewModel.mainComment("note0")
+        }
 
+        binding.nestedComment.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val data = viewModel.nestedComment(commentId = "id3")
 
-        viewModel.selectObserve(GroupieViewState::comments)
-            .collectIn(viewLifecycleOwner, action = ::renderList)
+            }
+        }
+
+        viewModel.events.collectIn(viewLifecycleOwner) {
+
+            binding.rvContent.smoothScrollToPosition(0)
+        }
+
+        viewModel.state.collectIn(viewLifecycleOwner) {
+            Timber.d("state list size it.comments ${it.comments.size}")
+            renderList(it.comments)
+        }
     }
 
     private fun renderList(list: List<CommentCacheData>?) {
@@ -74,7 +90,6 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
 
                 // add more action item
                 if (comment.hasMore) {
-                    val lastItem = groups.last { it is NestedCommentItem } as NestedCommentItem
                     addMoreCommentItem(this, comment)
                 }
             }
@@ -93,8 +108,7 @@ class GroupieFragment : Fragment(R.layout.fragment_content) {
                 val data =
                     viewModel.loadNestedComment(comment.commentData.commentId, comment.nextPage)
                         ?: return@launch
-                val newNestedComment =
-                    data.nestedComments.map { NestedCommentItem(it) } ?: emptyList()
+                val newNestedComment = data.nestedComments.map { NestedCommentItem(it) }
                 section.update(newNestedComment)
 
                 if (data.hasMore) {
