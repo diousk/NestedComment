@@ -28,7 +28,15 @@ class CommentCache @Inject constructor(
         val commentCache = cache[commentId] ?: return
         val currentNestedComments = commentCache.nestedComments.toMutableList()
         val newNestedComments = (currentNestedComments + comments).distinctBy { it.commentId }
-        cache[commentId] = commentCache.copy(nestedComments = newNestedComments, nextPage = nextPage)
+        cache[commentId] =
+            commentCache.copy(nestedComments = newNestedComments, nextPage = nextPage)
+    }
+
+    fun prependNestedComment(commentId: String, comments: List<CommentData>) {
+        val commentCache = cache[commentId] ?: return
+        val currentNestedComments = commentCache.nestedComments.toMutableList()
+        val newNestedComments = (comments + currentNestedComments).distinctBy { it.commentId }
+        cache[commentId] = commentCache.copy(nestedComments = newNestedComments)
     }
 
     fun removeComment(commentId: String) {

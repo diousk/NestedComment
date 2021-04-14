@@ -15,9 +15,9 @@ object DataProvider {
 
     fun createUserComment(commentId: String): CommentData {
         return CommentData(
-            "${commentId}_user_new_0",
+            "${commentId}_user_new_0_${System.currentTimeMillis()}",
             "user_user_new_0",
-            "hello user_new_0",
+            "hello $commentId",
             0,
             null
         )
