@@ -1,14 +1,15 @@
 package com.lang.commentsystem.epoxy
 
+import androidx.lifecycle.LifecycleCoroutineScope
+import androidx.paging.LoadState
 import com.airbnb.epoxy.EpoxyModel
 import com.lang.commentsystem.data.CommentData
 import com.lang.commentsystem.epoxy.model.CommentCacheData
 import com.lang.commentsystem.epoxy.model.UiModel
 import com.lang.commentsystem.epoxy.repo.CommentCache
-import com.lang.commentsystem.epoxy.view.CommentHolder
-import com.lang.commentsystem.epoxy.view.EmptyPlaceholder
-import com.lang.commentsystem.epoxy.view.ExpandNestedCommentHolder
-import com.lang.commentsystem.epoxy.view.NestedCommentHolder
+import com.lang.commentsystem.epoxy.view.*
+import com.lang.commentsystem.utils.observeAppendState
+import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -18,18 +19,30 @@ interface CommentListener {
     fun onCommentClick(commentData: CommentData, position: Int)
 }
 
-class NoteController @Inject constructor(
-    val commentCache: CommentCache
+class NoteController(
+    val commentCache: CommentCache,
+    val coroutineScope: LifecycleCoroutineScope
 ) : PageController<UiModel>() {
 
     var userComments: List<CommentCacheData> = emptyList()
     var commentListener: CommentListener? = null
 
-    // TODO: add user self's comments at top
+    private var appendState: LoadState? = null
+    init {
+        coroutineScope.launchWhenResumed {
+            observeAppendState().collectLatest {
+                appendState = it
+                requestModelBuild()
+            }
+        }
+    }
 
     override fun buildItemModel(currentPosition: Int, item: UiModel?): EpoxyModel<*> {
-        Timber.d("buildItemModel")
+        Timber.d("buildItemModel $currentPosition")
         return when (item) {
+            is UiModel.Content -> {
+                HeaderHolder(item).id(item.contentData.noteId)
+            }
             is UiModel.Comment -> {
                 CommentHolder(item, commentListener).id(item.commentData.commentId)
             }
@@ -39,9 +52,17 @@ class NoteController @Inject constructor(
 
     override fun addModels(models: List<EpoxyModel<*>>) {
         Timber.d("addModels userComments size ${userComments.size}")
-
         var offset = 0
+        val firstModel = models.firstOrNull()
+        if (models.firstOrNull() is HeaderHolder) {
+            add(firstModel)
+            offset++
+        }
+        val modelList = models.toMutableList().subList(offset, models.size)
+
+
         userComments.forEach { item ->
+            Timber.d("userComments item ${item.commentData}")
             CommentHolder(UiModel.Comment(item.commentData), commentListener).apply {
                 id(item.commentData.commentId)
                 position = offset
@@ -54,7 +75,7 @@ class NoteController @Inject constructor(
         }
 
         Timber.d("addModels models size ${models.size}")
-        val modelList = models.toMutableList()
+
         val iterator = modelList.listIterator()
         for (model in iterator) {
             Timber.d("model $model, offset = $offset")
@@ -77,7 +98,7 @@ class NoteController @Inject constructor(
                     offset++
                     iterator.add(
                         ExpandNestedCommentHolder(cachedComment.commentData, cachedComment.nextPage, commentListener)
-                            .id(cachedComment.commentData.commentId + cachedComment.nextPage)
+                            .id(cachedComment.commentData.commentId + "nested")
                     )
                 }
             }
@@ -85,5 +106,8 @@ class NoteController @Inject constructor(
         }
 
         super.addModels(modelList)
+        if (appendState == LoadState.Loading) {
+            FooterLoadingHolder(LoadState.Loading).id("footer").addTo(this)
+        }
     }
 }

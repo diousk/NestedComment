@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView.AdapterDataObserver
 import com.lang.commentsystem.R
 import com.lang.commentsystem.data.CommentData
 import com.lang.commentsystem.databinding.FragmentContentBinding
+import com.lang.commentsystem.epoxy.repo.CommentCache
 import com.lang.commentsystem.utils.collectIn
 import com.lang.commentsystem.utils.setDuration
 import com.lang.commentsystem.utils.viewBinding
@@ -23,8 +24,8 @@ import javax.inject.Inject
 class EpoxyFragment : Fragment(R.layout.fragment_content), CommentListener {
     private val viewModel by viewModels<EpoxyViewModel>()
     private val binding by viewBinding(FragmentContentBinding::bind)
-
     @Inject
+    lateinit var commentCache: CommentCache
     lateinit var controller: NoteController
 
     lateinit var layoutManager: LinearLayoutManager
@@ -32,6 +33,8 @@ class EpoxyFragment : Fragment(R.layout.fragment_content), CommentListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         layoutManager = LinearLayoutManagerSmoothly(requireContext(), viewLifecycleOwner.lifecycleScope)
+
+        controller =  NoteController(commentCache, viewLifecycleOwner.lifecycleScope)
         controller.commentListener = this
         binding.rvContent.itemAnimator?.setDuration(150)
         binding.rvContent.layoutManager = layoutManager

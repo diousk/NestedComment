@@ -2,6 +2,7 @@ package com.lang.commentsystem.epoxy
 
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import androidx.paging.insertHeaderItem
 import androidx.paging.map
 import com.lang.commentsystem.data.CommentData
 import com.lang.commentsystem.data.DataProvider
@@ -26,7 +27,11 @@ class EpoxyViewModel @Inject constructor(
 ) : ReduxViewModel<EpoxyViewState>(EpoxyViewState()) {
 
     val comments = commentRepo.getComments("noteId1", 5)
-        .map { paging -> paging.map<CommentData, UiModel> { UiModel.Comment(it) } }
+        .map { paging ->
+            val contentData = DataProvider.getContent()
+            paging.map<CommentData, UiModel> { UiModel.Comment(it) }
+                .insertHeaderItem(item = UiModel.Content(contentData))
+        }
         .cachedIn(viewModelScope)
 
     val commentChange = Channel<Unit>(Channel.RENDEZVOUS)

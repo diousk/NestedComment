@@ -13,8 +13,10 @@ data class ExpandNestedCommentHolder(
 ) : ViewBindingKotlinModel<LayoutNestedMoreBinding>(R.layout.layout_nested_more){
     override fun LayoutNestedMoreBinding.bind() {
         val commentId = commentData.commentId
+        content.text = "nested load more"
         root.setOnClickListener {
-        Timber.d("loadNestedCommentListener nextPage $nextPage")
+            content.text = "Loading..."
+            Timber.d("loadNestedCommentListener nextPage $nextPage")
             commentListener?.onLoadNested(commentId, nextPage)
         }
     }

@@ -76,7 +76,7 @@ dependencies {
     implementation "com.xwray:groupie-kotlin-android-extensions:$groupie_version"
 
     // epoxy
-    def epoxy_version = "4.4.4"
+    def epoxy_version = "4.5.0"
     implementation "com.airbnb.android:epoxy:$epoxy_version"
     implementation "com.airbnb.android:epoxy-paging3:$epoxy_version"
     kapt "com.airbnb.android:epoxy-processor:$epoxy_version"

@@ -28,7 +28,7 @@ object DataProvider {
         val adapter: JsonAdapter<List<CommentData>> =
             moshi.adapter(Types.newParameterizedType(List::class.java, CommentData::class.java))
 
-        if (page == 3) return emptyList()
+        if (page == 5) return emptyList()
         val start = (page-1) * 10 + 1
         val end = start + 9
         return (start..end).map { index ->
@@ -76,7 +76,7 @@ object DataProvider {
     }
 
     suspend fun getNestedComment(commentId: String, page: Int): List<CommentData> {
-        delay(1000)
+        delay(3000)
         if (page == 3) {
             return emptyList()
         }

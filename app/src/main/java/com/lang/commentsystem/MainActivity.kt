@@ -5,8 +5,10 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.fragment.app.add
 import androidx.fragment.app.replace
+import com.facebook.drawee.view.SimpleDraweeView
 import com.lang.commentsystem.epoxy.EpoxyFragment
 import com.lang.commentsystem.groupie.GroupieFragment
+import com.lang.commentsystem.utils.loadImageUrl
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
